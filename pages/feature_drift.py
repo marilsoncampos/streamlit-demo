@@ -104,37 +104,40 @@ class DataDriftTester:
 
 
 def app():
-    st.markdown("__Feature Drift__")
-    tester = DataDriftTester()
-    level = st.slider("Inject drift", min_value=0, max_value=20, step=1, value=10)
-    recalc = st.button('Calculate')
     hide_footer(st)
+    side_col, dummy, work_area = st.columns([10, 1, 18])
+
+    side_col.markdown("__Feature Drift__")
+    level = side_col.slider("Inject drift", min_value=0, max_value=20, step=1, value=10)
+    recalc = side_col.button('Calculate')
+
+    tester = DataDriftTester()
     if recalc:
         tester.build_data(level)
         tester.run_tests()
-        st.markdown("__Drift parameters__")
-        st.text('Categorical Probabilities : {0}'.format([round(x, 3) for x in tester.adjusted_probs]))
-        st.text('Numeric adjustment ratio  : {0}'.format(round(tester.adjusted_ratio, 3)))
+        work_area.markdown("__Drift parameters__")
+        work_area.text('Categorical Probabilities : {0}'.format([round(x, 3) for x in tester.adjusted_probs]))
+        work_area.text('Numeric adjustment ratio  : {0}'.format(round(tester.adjusted_ratio, 3)))
 
-        st.markdown("__Categorical Values Comparison__")
+        work_area.markdown("__Categorical Values Comparison__")
         cat_data = tester.df_test[['categorical_without_drift', 'categorical_with_drift']].copy()
         cat_data_counts1 = cat_data.groupby('categorical_without_drift').count()
-        st.bar_chart(cat_data_counts1, height=160)
+        work_area.bar_chart(cat_data_counts1, height=160)
 
         cat_data_counts2 = cat_data.groupby('categorical_with_drift').count()
-        st.bar_chart(cat_data_counts2, height=160)
+        work_area.bar_chart(cat_data_counts2, height=160)
 
         # chart_data = tester.df_test[['categorical_without_drift', 'categorical_with_drift']].copy()
         chart_data = tester.df_test[['numeric_without_drift', 'numeric_with_drift']].copy()
         chart_data.columns = ['clean', 'drift']
-        st.markdown("__Numeric Values Comparison__")
-        st.line_chart(chart_data, height=120)
+        work_area.markdown("__Numeric Values Comparison__")
+        work_area.line_chart(chart_data, height=120)
 
-        st.markdown("__Train Dataframe__")
-        st.dataframe(tester.df_train.head())
+        work_area.markdown("__Train Dataframe__")
+        work_area.dataframe(tester.df_train.head())
 
-        st.markdown("__Test Dataframe__")
-        st.dataframe(tester.df_test.head())
+        work_area.markdown("__Test Dataframe__")
+        work_area.dataframe(tester.df_test.head())
 
-        st.markdown("__Results__")
-        st.json(tester.format_results())
+        work_area.markdown("__Results__")
+        work_area.json(tester.format_results())
